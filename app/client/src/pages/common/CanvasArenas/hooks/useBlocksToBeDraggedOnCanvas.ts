@@ -17,13 +17,13 @@ import {
   widgetOperationParams,
 } from "utils/WidgetPropsUtils";
 import { DropTargetContext } from "components/editorComponents/DropTargetComponent";
-import { XYCord } from "utils/hooks/useCanvasDragging";
+import { XYCord } from "./useCanvasDragging";
 import { isEmpty } from "lodash";
 import { CanvasDraggingArenaProps } from "pages/common/CanvasArenas/CanvasDraggingArena";
 import { useDispatch } from "react-redux";
 import { ReduxActionTypes } from "constants/ReduxActionConstants";
 import { EditorContext } from "components/editorComponents/EditorContextProvider";
-import { useWidgetSelection } from "./useWidgetSelection";
+import { useWidgetSelection } from "../../../../utils/hooks/useWidgetSelection";
 import AnalyticsUtil from "utils/AnalyticsUtil";
 import { snapToGrid } from "utils/helpers";
 

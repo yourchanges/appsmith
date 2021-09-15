@@ -8,8 +8,8 @@ import { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { getZoomLevel } from "selectors/editorSelectors";
 import { getNearestParentCanvas } from "utils/generators";
+import { useWidgetDragResize } from "utils/hooks/dragResizeHooks";
 import { noCollision } from "utils/WidgetPropsUtils";
-import { useWidgetDragResize } from "./dragResizeHooks";
 import {
   useBlocksToBeDraggedOnCanvas,
   WidgetDraggingBlock,
