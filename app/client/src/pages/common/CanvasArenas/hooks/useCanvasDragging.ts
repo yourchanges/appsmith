@@ -10,6 +10,7 @@ import { getZoomLevel } from "selectors/editorSelectors";
 import { getNearestParentCanvas } from "utils/generators";
 import { useWidgetDragResize } from "utils/hooks/dragResizeHooks";
 import { noCollision } from "utils/WidgetPropsUtils";
+import { getCanvasTopOffset } from "../utils";
 import {
   useBlocksToBeDraggedOnCanvas,
   WidgetDraggingBlock,
@@ -22,8 +23,8 @@ export interface XYCord {
 }
 
 export const useCanvasDragging = (
-  canvasRef: React.RefObject<HTMLDivElement>,
-  canvasDrawRef: React.RefObject<HTMLCanvasElement>,
+  slidingArenaRef: React.RefObject<HTMLDivElement>,
+  stickyCanvasRef: React.RefObject<HTMLCanvasElement>,
   {
     canExtend,
     dropDisabled,
@@ -67,69 +68,9 @@ export const useCanvasDragging = (
     setDraggingNewWidget,
     setDraggingState,
   } = useWidgetDragResize();
-  const getCanvasToDrawTopOffset = (
-    scrollParentTop: number,
-    scrollParentTopHeight: number,
-    canvasTop: number,
-    canvasHeight: number,
-  ) => {
-    return scrollParentTop > canvasTop
-      ? Math.min(
-          scrollParentTop - canvasTop,
-          canvasHeight - scrollParentTopHeight,
-        )
-      : 0;
-  };
-
-  const updateCanvasStyles = () => {
-    const parentCanvas: Element | null = getNearestParentCanvas(
-      canvasRef.current,
-    );
-
-    if (parentCanvas && canvasDrawRef.current && canvasRef.current) {
-      const {
-        height: scrollParentTopHeight,
-      } = parentCanvas.getBoundingClientRect();
-      const { width } = canvasRef.current.getBoundingClientRect();
-      canvasDrawRef.current.style.width = width / canvasZoomLevel + "px";
-      canvasDrawRef.current.style.position = canExtend ? "absolute" : "sticky";
-      canvasDrawRef.current.style.left = "0px";
-      canvasDrawRef.current.style.top = getCanvasTopOffset() + "px";
-      canvasDrawRef.current.style.height =
-        scrollParentTopHeight / canvasZoomLevel + "px";
-    }
-  };
-
-  const getCanvasTopOffset = () => {
-    const parentCanvas: Element | null = getNearestParentCanvas(
-      canvasRef.current,
-    );
-
-    if (parentCanvas && canvasDrawRef.current && canvasRef.current) {
-      if (canExtend) {
-        return parentCanvas.scrollTop;
-      } else {
-        const {
-          height: scrollParentTopHeight,
-          top: scrollParentTop,
-        } = parentCanvas.getBoundingClientRect();
-        const {
-          height: canvasHeight,
-          top: canvasTop,
-        } = canvasRef.current.getBoundingClientRect();
-        return getCanvasToDrawTopOffset(
-          scrollParentTop,
-          scrollParentTopHeight,
-          canvasTop,
-          canvasHeight,
-        );
-      }
-    }
-    return 0;
-  };
 
   const canScroll = useCanvasDragToScroll(
-    canvasRef,
+    slidingArenaRef,
     isCurrentDraggedCanvas,
     isDragging,
     snapRows,
@@ -137,13 +78,13 @@ export const useCanvasDragging = (
   );
   useEffect(() => {
     if (
-      canvasRef.current &&
+      slidingArenaRef.current &&
       !isResizing &&
       isDragging &&
       blocksToDraw.length > 0
     ) {
       const scrollParent: Element | null = getNearestParentCanvas(
-        canvasRef.current,
+        slidingArenaRef.current,
       );
       let canvasIsDragging = false;
       let isUpdatingRows = false;
@@ -151,15 +92,15 @@ export const useCanvasDragging = (
       const scrollObj: any = {};
 
       const resetCanvasState = () => {
-        if (canvasDrawRef.current && canvasRef.current) {
-          const canvasCtx: any = canvasDrawRef.current.getContext("2d");
+        if (stickyCanvasRef.current && slidingArenaRef.current) {
+          const canvasCtx: any = stickyCanvasRef.current.getContext("2d");
           canvasCtx.clearRect(
             0,
             0,
-            canvasDrawRef.current.width,
-            canvasDrawRef.current.height,
+            stickyCanvasRef.current.width,
+            stickyCanvasRef.current.height,
           );
-          canvasRef.current.style.zIndex = "";
+          slidingArenaRef.current.style.zIndex = "";
           canvasIsDragging = false;
         }
       };
@@ -190,7 +131,7 @@ export const useCanvasDragging = (
             !isResizing &&
             isDragging &&
             !canvasIsDragging &&
-            canvasRef.current
+            slidingArenaRef.current
           ) {
             if (!isNewWidget) {
               startPoints.left =
@@ -203,12 +144,12 @@ export const useCanvasDragging = (
               setDraggingCanvas(widgetId);
             }
             canvasIsDragging = true;
-            canvasRef.current.style.zIndex = "2";
+            slidingArenaRef.current.style.zIndex = "2";
             onMouseMove(e);
           }
         };
         const onMouseMove = (e: any) => {
-          if (isDragging && canvasIsDragging && canvasRef.current) {
+          if (isDragging && canvasIsDragging && slidingArenaRef.current) {
             const delta = {
               left: e.offsetX - startPoints.left - parentDiff.left,
               top: e.offsetY - startPoints.top - parentDiff.top,
@@ -240,7 +181,7 @@ export const useCanvasDragging = (
                   each.detachFromLayout,
                 ),
             }));
-            if (rowDelta && canvasRef.current) {
+            if (rowDelta && slidingArenaRef.current) {
               isUpdatingRows = true;
               canScroll.current = false;
               renderNewRows(delta);
@@ -259,8 +200,8 @@ export const useCanvasDragging = (
         };
         const renderNewRows = debounce((delta) => {
           isUpdatingRows = true;
-          if (canvasRef.current && canvasDrawRef.current) {
-            const canvasCtx: any = canvasDrawRef.current.getContext("2d");
+          if (slidingArenaRef.current && stickyCanvasRef.current) {
+            const canvasCtx: any = stickyCanvasRef.current.getContext("2d");
 
             currentRectanglesToDraw = blocksToDraw.map((each) => {
               return {
@@ -289,8 +230,8 @@ export const useCanvasDragging = (
             canvasCtx.clearRect(
               0,
               0,
-              canvasDrawRef.current.width,
-              canvasDrawRef.current.height,
+              stickyCanvasRef.current.width,
+              stickyCanvasRef.current.height,
             );
             canvasCtx.restore();
             renderBlocks();
@@ -313,18 +254,18 @@ export const useCanvasDragging = (
 
         const renderBlocks = () => {
           if (
-            canvasRef.current &&
+            slidingArenaRef.current &&
             isCurrentDraggedCanvas &&
             canvasIsDragging &&
-            canvasDrawRef.current
+            stickyCanvasRef.current
           ) {
-            const canvasCtx: any = canvasDrawRef.current.getContext("2d");
+            const canvasCtx: any = stickyCanvasRef.current.getContext("2d");
             canvasCtx.save();
             canvasCtx.clearRect(
               0,
               0,
-              canvasDrawRef.current.width,
-              canvasDrawRef.current.height,
+              stickyCanvasRef.current.width,
+              stickyCanvasRef.current.height,
             );
             isUpdatingRows = false;
             canvasCtx.transform(canvasZoomLevel, 0, 0, canvasZoomLevel, 0, 0);
@@ -339,14 +280,18 @@ export const useCanvasDragging = (
 
         const drawBlockOnCanvas = (blockDimensions: WidgetDraggingBlock) => {
           if (
-            canvasDrawRef.current &&
-            canvasRef.current &&
+            stickyCanvasRef.current &&
+            slidingArenaRef.current &&
             scrollParent &&
             isCurrentDraggedCanvas &&
             canvasIsDragging
           ) {
-            const canvasCtx: any = canvasDrawRef.current.getContext("2d");
-            const topOffset = getCanvasTopOffset();
+            const canvasCtx: any = stickyCanvasRef.current.getContext("2d");
+            const topOffset = getCanvasTopOffset(
+              slidingArenaRef,
+              stickyCanvasRef,
+              canExtend,
+            );
             const snappedXY = getSnappedXY(
               snapColumnSpace,
               snapRowSpace,
@@ -412,22 +357,29 @@ export const useCanvasDragging = (
           }
         };
         const initializeListeners = () => {
-          canvasRef.current?.addEventListener("mousemove", onMouseMove, false);
-          canvasRef.current?.addEventListener("mouseup", onMouseUp, false);
-          scrollParent?.addEventListener("scroll", updateCanvasStyles, false);
+          slidingArenaRef.current?.addEventListener(
+            "mousemove",
+            onMouseMove,
+            false,
+          );
+          slidingArenaRef.current?.addEventListener(
+            "mouseup",
+            onMouseUp,
+            false,
+          );
           scrollParent?.addEventListener("scroll", onScroll, false);
 
-          canvasRef.current?.addEventListener(
+          slidingArenaRef.current?.addEventListener(
             "mouseover",
             onFirstMoveOnCanvas,
             false,
           );
-          canvasRef.current?.addEventListener(
+          slidingArenaRef.current?.addEventListener(
             "mouseout",
             resetCanvasState,
             false,
           );
-          canvasRef.current?.addEventListener(
+          slidingArenaRef.current?.addEventListener(
             "mouseleave",
             resetCanvasState,
             false,
@@ -436,36 +388,44 @@ export const useCanvasDragging = (
           window.addEventListener("mouseup", onMouseUp, false);
         };
         const startDragging = () => {
-          if (canvasRef.current && canvasDrawRef.current && scrollParent) {
+          if (
+            slidingArenaRef.current &&
+            stickyCanvasRef.current &&
+            scrollParent
+          ) {
             const { height } = scrollParent.getBoundingClientRect();
-            const { width } = canvasRef.current.getBoundingClientRect();
-            const canvasCtx: any = canvasDrawRef.current.getContext("2d");
-            canvasDrawRef.current.width = width * scale;
-            canvasDrawRef.current.height = height * scale;
+            const { width } = slidingArenaRef.current.getBoundingClientRect();
+            const canvasCtx: any = stickyCanvasRef.current.getContext("2d");
+            stickyCanvasRef.current.width = width * scale;
+            stickyCanvasRef.current.height = height * scale;
             canvasCtx.scale(scale, scale);
-            updateCanvasStyles();
             initializeListeners();
             if (
               (isChildOfCanvas || isNewWidgetInitialTargetCanvas) &&
-              canvasRef.current
+              slidingArenaRef.current
             ) {
-              canvasRef.current.style.zIndex = "2";
+              slidingArenaRef.current.style.zIndex = "2";
             }
           }
         };
         startDragging();
 
         return () => {
-          canvasRef.current?.removeEventListener("mousemove", onMouseMove);
-          canvasRef.current?.removeEventListener("mouseup", onMouseUp);
-          scrollParent?.removeEventListener("scroll", updateCanvasStyles);
+          slidingArenaRef.current?.removeEventListener(
+            "mousemove",
+            onMouseMove,
+          );
+          slidingArenaRef.current?.removeEventListener("mouseup", onMouseUp);
           scrollParent?.removeEventListener("scroll", onScroll);
-          canvasRef.current?.removeEventListener(
+          slidingArenaRef.current?.removeEventListener(
             "mouseover",
             onFirstMoveOnCanvas,
           );
-          canvasRef.current?.removeEventListener("mouseout", resetCanvasState);
-          canvasRef.current?.removeEventListener(
+          slidingArenaRef.current?.removeEventListener(
+            "mouseout",
+            resetCanvasState,
+          );
+          slidingArenaRef.current?.removeEventListener(
             "mouseleave",
             resetCanvasState,
           );
