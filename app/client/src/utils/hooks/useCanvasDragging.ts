@@ -3,7 +3,7 @@ import {
   GridDefaults,
 } from "constants/WidgetConstants";
 import { debounce, throttle } from "lodash";
-import { CanvasDraggingArenaProps } from "pages/common/CanvasDraggingArena";
+import { CanvasDraggingArenaProps } from "pages/common/CanvasArenas/CanvasDraggingArena";
 import { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { getZoomLevel } from "selectors/editorSelectors";
