@@ -489,6 +489,7 @@ export function CanvasSelectionArena({
       id={`div-selection-${widgetId}`}
       ref={canvasRef}
       showCanvas={shouldShow}
+      snapRows={snapRows}
     />
   );
 }
