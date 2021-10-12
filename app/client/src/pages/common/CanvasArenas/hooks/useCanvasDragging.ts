@@ -8,6 +8,7 @@ import { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { getZoomLevel } from "selectors/editorSelectors";
 import { getNearestParentCanvas } from "utils/generators";
+import { getAbsolutePixels } from "utils/helpers";
 import { useWidgetDragResize } from "utils/hooks/dragResizeHooks";
 import { noCollision } from "utils/WidgetPropsUtils";
 import { getCanvasTopOffset } from "../utils";
@@ -287,10 +288,9 @@ export const useCanvasDragging = (
             canvasIsDragging
           ) {
             const canvasCtx: any = stickyCanvasRef.current.getContext("2d");
-            const topOffset = getCanvasTopOffset(
-              slidingArenaRef,
-              stickyCanvasRef,
-              canExtend,
+            stickyCanvasRef.current.style.top;
+            const topOffset = getAbsolutePixels(
+              stickyCanvasRef.current.style.top,
             );
             const snappedXY = getSnappedXY(
               snapColumnSpace,
@@ -403,8 +403,10 @@ export const useCanvasDragging = (
 
             const canvasCtx: any = stickyCanvasRef.current.getContext("2d");
             stickyCanvasRef.current.width = width * scale;
+
             stickyCanvasRef.current.height =
-              Math.min(scrollParentTopHeight, height) * scale;
+              Math.min(window.innerHeight, scrollParentTopHeight, height) *
+              scale;
             canvasCtx.scale(scale, scale);
             initializeListeners();
             if (
