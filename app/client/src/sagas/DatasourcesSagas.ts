@@ -801,6 +801,7 @@ function* updateDatasourceSuccessSaga(action: UpdateDatasourceSuccessAction) {
   const isGeneratePageInitiator = getIsGeneratePageInitiator(
     queryParams.isGeneratePageMode,
   );
+
   if (
     isGeneratePageInitiator &&
     updatedDatasource.pluginId &&
