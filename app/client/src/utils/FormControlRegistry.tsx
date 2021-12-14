@@ -40,6 +40,9 @@ import WhereClauseControl, {
 import SortingControl, {
   SortingControlProps,
 } from "components/formControls/SortingControl";
+import PaginationControl, {
+  PaginationControlProps,
+} from "components/formControls/PaginationControl";
 
 class FormControlRegistry {
   static registerFormControlBuilders() {
@@ -115,6 +118,11 @@ class FormControlRegistry {
     FormControlFactory.registerControlBuilder("SORTING", {
       buildPropertyControl(controlProps: SortingControlProps): JSX.Element {
         return <SortingControl {...controlProps} />;
+     },
+    });
+    FormControlFactory.registerControlBuilder("PAGINATION", {
+      buildPropertyControl(controlProps: PaginationControlProps): JSX.Element {
+        return <PaginationControl {...controlProps} />;
       },
     });
   }
