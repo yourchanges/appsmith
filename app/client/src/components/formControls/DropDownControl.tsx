@@ -58,6 +58,7 @@ class DropDownControl extends BaseControl<DropDownControlProps> {
       isSearchable,
       label,
       options,
+      placeholderText,
       subtitle,
     } = this.props;
 
@@ -83,7 +84,7 @@ class DropDownControl extends BaseControl<DropDownControlProps> {
             isSearchable={isSearchable}
             name={configProperty}
             options={options}
-            placeholder=""
+            placeholder={placeholderText || ""}
             width={width}
           />
         </DropdownSelect>

@@ -37,6 +37,9 @@ import FieldArrayControl, {
 import WhereClauseControl, {
   WhereClauseControlProps,
 } from "components/formControls/WhereClauseControl";
+import SortingControl, {
+  SortingControlProps,
+} from "components/formControls/SortingControl";
 
 class FormControlRegistry {
   static registerFormControlBuilders() {
@@ -107,6 +110,11 @@ class FormControlRegistry {
     FormControlFactory.registerControlBuilder("WHERE_CLAUSE", {
       buildPropertyControl(controlProps: WhereClauseControlProps): JSX.Element {
         return <WhereClauseControl {...controlProps} />;
+      },
+    });
+    FormControlFactory.registerControlBuilder("SORTING", {
+      buildPropertyControl(controlProps: SortingControlProps): JSX.Element {
+        return <SortingControl {...controlProps} />;
       },
     });
   }
