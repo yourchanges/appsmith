@@ -118,7 +118,7 @@ class FormControlRegistry {
     FormControlFactory.registerControlBuilder("SORTING", {
       buildPropertyControl(controlProps: SortingControlProps): JSX.Element {
         return <SortingControl {...controlProps} />;
-     },
+      },
     });
     FormControlFactory.registerControlBuilder("PAGINATION", {
       buildPropertyControl(controlProps: PaginationControlProps): JSX.Element {
