@@ -11,7 +11,6 @@ import { getNearestParentCanvas } from "utils/generators";
 import { getAbsolutePixels } from "utils/helpers";
 import { useWidgetDragResize } from "utils/hooks/dragResizeHooks";
 import { noCollision } from "utils/WidgetPropsUtils";
-import { getCanvasTopOffset } from "../utils";
 import {
   useBlocksToBeDraggedOnCanvas,
   WidgetDraggingBlock,
